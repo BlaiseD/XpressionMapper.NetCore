@@ -53,3 +53,27 @@
 }
 </code></pre>
 </body></html>
+
+## To get started:
+* Run the .NET Core 1.1 SDK - Installer and Visual Studio 2015 Tools (Preview 2) from [here](https://www.microsoft.com/net/download/core#/current).
+* Build the Solution.
+
+## Create the database
+* Search the solution for "Server=.\\SQL2016;Database=SchoolDb02" and update connection strings if necessary.
+* Open a command window at {Solution Folder}\src\MigrationTool then execute following command:
+  * dotnet ef database update
+
+## Seed the database
+Execute StoreTestConsole to seed the database.
+
+## Run the Web API Solution
+Set ContosoUniverity.WebApi as the start up project and press CTRL+F5 to run the Web API project.
+
+## To run the Angular 2 project:
+Get the latest versions of nodejs and npm as described [here](https://docs.npmjs.com/getting-started/installing-node).
+Open a command window at {Solution Folder}\src\ContosoUniverity.Angular2.Web and run:
+* npm install
+* npm install -g angular-cli
+* ng serve
+
+Open the browser as described in the output. NG Live Development Server is running on http://localhost:{port#}.
