@@ -1,0 +1,29 @@
+<h2>{{title}}</h2>
+
+<p>
+  <a [routerLink]="['/course-create']">Create New</a>
+</p>
+<table class="table" *ngIf='courses && courses.length'>
+  <thead>
+    <tr>
+      <th>Number</th>
+      <th>Credits</th>
+      <th>Title</th>
+      <th>Department</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor='let course of courses'>
+      <td>{{ course.courseID }}</td>
+      <td>{{ course.credits}}</td>
+      <td>{{ course.title }}</td>
+      <td>{{ course.departmentName}}</td>
+      <td>
+        <a [routerLink]="['/course-edit', course.courseID]">Edit</a> |
+        <a [routerLink]="['/course-detail', course.courseID]">Details</a> |
+        <a [routerLink]="['/course-delete', course.courseID]">Delete</a>
+      </td>
+    </tr>
+  </tbody>
+</table>

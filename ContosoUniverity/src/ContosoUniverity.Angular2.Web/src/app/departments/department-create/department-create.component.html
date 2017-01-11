@@ -1,0 +1,67 @@
+<h2>Create</h2>
+
+<form #departmentForm="ngForm" (ngSubmit)="submitClick()">
+  <div class="form-horizontal" *ngIf='department'>
+    <h4>{{title}}</h4>
+    <hr />
+    <div class="form-group">
+      <label for="budget" class="col-md-2 control-label">Budget</label>
+      <div class="col-md-10">
+        <input name="budget" type="number" [(ngModel)]="department.budget" required #budget="ngModel" class="form-control" />
+        <div *ngIf="budget.errors && (budget.dirty || budget.touched)" class="alert alert-danger validation-message">
+          <div [hidden]="!budget.errors.required">
+            Budget is required
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="instructorID" class="control-label col-md-2">Administrator</label>
+      <div class="col-md-10">
+        <select class="form-control" name="instructorID" [(ngModel)]="department.instructorID"
+          required #instructorID="ngModel">
+        <option *ngFor="let ins of instructors" [value]="ins.id">  
+                  {{ins.fullName}}
+        </option>
+        </select>
+        <div *ngIf="instructorID.errors && (instructorID.dirty || instructorID.touched)" class="alert alert-danger validation-message">
+          <div [hidden]="!instructorID.errors.required">
+            Administrator is required
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="name" class="col-md-2 control-label">Name</label>
+      <div class="col-md-10">
+        <input name="name" [(ngModel)]="department.name" class="form-control" required #name="ngModel" />
+        <div *ngIf="name.errors && (name.dirty || name.touched)" class="alert alert-danger validation-message">
+          <div [hidden]="!name.errors.required">
+            Name is required
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="startDate" class="col-md-2 control-label">Start Date</label>
+      <div class="col-md-10">
+        <input name="startDate" type="date" [(ngModel)]="convertToDate" (ngModelChange)="department.startDate = $event" class="form-control"
+          required #startDate="ngModel" />
+        <div *ngIf="startDate.errors && (startDate.dirty || startDate.touched)" class="alert alert-danger validation-message">
+          <div [hidden]="!startDate.errors.required">
+            Start Date is required
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-md-offset-2 col-md-10">
+        <input type="submit" [disabled]="!departmentForm.form.valid" value="Save" class="btn btn-default" />
+      </div>
+    </div>
+  </div>
+</form>
+
+<div>
+  <a [routerLink]="['/departments']">Back to List</a>
+</div>

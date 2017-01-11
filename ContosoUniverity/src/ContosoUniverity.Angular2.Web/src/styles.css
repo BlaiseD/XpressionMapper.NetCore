@@ -1,0 +1,15 @@
+/* You can add global styles to this file, and also import other style files */
+body {
+    padding-top: 60px;
+}
+
+input,
+select,
+textarea,
+.validation-message {
+    max-width: 280px;
+}
+
+
+
+@import "../node_modules/bootstrap/dist/css/bootstrap.min.css"

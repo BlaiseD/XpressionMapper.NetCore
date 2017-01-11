@@ -1,0 +1,49 @@
+<h2>Details</h2>
+
+<div>
+  <h4>{{title}}</h4>
+  <hr />
+  <dl class="dl-horizontal" *ngIf='student'>
+    <dt>
+      Enrollment Date
+    </dt>
+    <dd>
+      {{student.enrollmentDate | date: 'MM/dd/yyyy'}}
+    </dd>
+    <dt>
+      First Name
+    </dt>
+    <dd>
+      {{student.firstName}}
+    </dd>
+    <dt>
+      Last Name
+    </dt>
+    <dd>
+      {{student.lastName}}
+    </dd>
+    <dt>
+      Enrollments
+    </dt>
+    <dd>
+      <table class="table" *ngIf='student.enrollments && student.enrollments.length'>
+        <tr>
+          <th>Course Title</th>
+          <th>Grade</th>
+        </tr>
+        <tr *ngFor='let enrollment of student.enrollments'>
+          <td>
+            {{enrollment.courseTitle}}
+          </td>
+          <td>
+            {{enrollment.gradeLetter}}
+          </td>
+        </tr>
+      </table>
+    </dd>
+  </dl>
+</div>
+<div>
+  <a *ngIf='student' [routerLink]="['/student-edit', student.id]">Edit</a> |
+  <a [routerLink]="['/students']">Back to List</a>
+</div>

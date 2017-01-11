@@ -1,0 +1,36 @@
+<h2>Details</h2>
+
+<div>
+    <h4>{{title}}</h4>
+    <hr />
+    <dl class="dl-horizontal"  *ngIf='department'>
+        <dt>
+           Budget
+        </dt>
+        <dd>
+            {{department.budget | currency:'USD':true:'1.2-2'}}
+        </dd>
+        <dt>
+            Name
+        </dt>
+        <dd>
+            {{department.name}}
+        </dd>
+        <dt>
+           Administrator
+        </dt>
+        <dd>
+            {{department.administratorName}}
+        </dd>
+        <dt>
+            Start Date
+        </dt>
+        <dd>
+            {{department.startDate | date: 'MM/dd/yyyy'}}
+        </dd>
+    </dl>
+</div>
+<div>
+    <a  *ngIf='department' [routerLink]="['/department-edit', department.departmentID]">Edit</a> |
+    <a [routerLink]="['/departments']">Back to List</a>
+</div>

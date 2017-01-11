@@ -1,0 +1,39 @@
+<h2>{{title}}</h2>
+
+<p>
+    <a [routerLink]="['/student-create']">Create New</a>
+</p>
+<div>
+    <p>
+        Find by name: <input type="text" [(ngModel)]='listFilter' />
+        <input type="submit" value="Search" (click)="searchByName($event)" class="btn btn-default btn" /> |
+        <a href="javascript:void(0)" (click)="fullList($event)">Back to Full List</a>
+    </p>
+</div>
+<table class="table" *ngIf='students && students.length'>
+    <thead>
+        <tr>
+            <th><a href="javascript:void(0)" id='FirstName' (click)="sortBy($event)">First Name</a></th>
+            <th><a href="javascript:void(0)" id='LastName' (click)="sortBy($event)">Last Name</a></th>
+            <th><a href="javascript:void(0)" id='FullName' (click)="sortBy($event)">Full Name</a></th>
+            <th><a href="javascript:void(0)" id='EnrollmentDate' (click)="sortBy($event)">Entollment Date</a></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor='let student of students | paginate: { id: "server", itemsPerPage: _itemsPerPage, currentPage: _page, totalItems: _total}'>
+            <td>{{ student.firstName }}</td>
+            <td>{{ student.lastName }}</td>
+            <td>{{ student.fullName }}</td>
+            <td>{{ student.enrollmentDate | date: 'MM/dd/yyyy'}}</td>
+            <td>
+                <a [routerLink]="['/student-edit', student.id]">Edit</a> |
+                <a [routerLink]="['/student-detail', student.id]">Details</a> |
+                <a [routerLink]="['/student-delete', student.id]">Delete</a>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<div *ngIf='students && students.length'>
+    <pagination-controls (pageChange)="getPage($event)" id="server"></pagination-controls>
+</div>

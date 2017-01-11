@@ -1,0 +1,36 @@
+<h2>Details</h2>
+
+<div>
+    <h4>{{title}}</h4>
+    <hr />
+    <dl class="dl-horizontal"  *ngIf='course'>
+        <dt>
+           Number
+        </dt>
+        <dd>
+            {{course.courseID}}
+        </dd>
+        <dt>
+            Credits
+        </dt>
+        <dd>
+            {{course.credits}}
+        </dd>
+        <dt>
+           Department
+        </dt>
+        <dd>
+            {{course.departmentName}}
+        </dd>
+        <dt>
+            Title
+        </dt>
+        <dd>
+            {{ course.title}}
+        </dd>
+    </dl>
+</div>
+<div>
+    <a  *ngIf='course' [routerLink]="['/course-edit', course.courseID]">Edit</a> |
+    <a [routerLink]="['/courses']">Back to List</a>
+</div>

@@ -1,0 +1,42 @@
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+
+<div>
+    <h4>{{pageTitle}}</h4>
+    <hr />
+    <dl class="dl-horizontal"  *ngIf='course'>
+        <dt>
+           Number
+        </dt>
+        <dd>
+            {{course.courseID}}
+        </dd>
+        <dt>
+            Credits
+        </dt>
+        <dd>
+            {{course.credits}}
+        </dd>
+        <dt>
+           Department
+        </dt>
+        <dd>
+            {{course.departmentName}}
+        </dd>
+        <dt>
+            Title
+        </dt>
+        <dd>
+            {{ course.title}}
+        </dd>
+    </dl>
+</div>
+
+<form (ngSubmit)="submitClick()">
+  <div>
+    <input type="submit" value="Delete" class="btn btn-default" /> |
+    <a [routerLink]="['/courses']">Back to List</a>
+  </div>
+
+</form>

@@ -1,0 +1,23 @@
+<h2>{{title}}</h2>
+
+<div>
+
+    <hr />
+
+<div class='table'>
+      <table class='table' *ngIf='stats && stats.length'>
+        <thead>
+          <tr>
+            <th>Enrollment Date</th>
+            <th>Student Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor='let stat of stats'>
+            <td>{{ stat.enrollmentDate | date: 'MM/dd/yyyy'}}</td>
+            <td>{{ stat.studentCount }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+</div>

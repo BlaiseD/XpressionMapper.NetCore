@@ -1,0 +1,73 @@
+<h2>Create</h2>
+
+<form #courseForm="ngForm" (ngSubmit)="submitClick()">
+  <div class="form-horizontal" *ngIf='course'>
+    <h4>{{pageTitle}}</h4>
+    <hr />
+    <div class="form-group">
+      <label for="courseID" class="col-md-2 control-label">Number</label>
+      <div class="col-md-10">
+        <input name="courseID" type="number" [(ngModel)]="course.courseID" required #courseID="ngModel" class="form-control" />
+        <div *ngIf="courseID.errors && (courseID.dirty || courseID.touched)" class="alert alert-danger validation-message">
+          <div [hidden]="!courseID.errors.required">
+            Number is required
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="credits" class="col-md-2 control-label">Credits</label>
+      <div class="col-md-10">
+        <input name="credits" [(ngModel)]="course.credits" class="form-control" required #credits="ngModel" [min]="0" [max]="5"/>
+        <div *ngIf="credits.errors && (credits.dirty || credits.touched)" class="alert alert-danger validation-message">
+          <div [hidden]="!credits.errors.required">
+            Credits field is required
+          </div>
+          <div [hidden]="!credits.errors.min">
+            Credits must between 0 and 5 inclusive.
+          </div>
+          <div [hidden]="!credits.errors.max">
+            Credits must between 0 and 5 inclusive.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="departmentID" class="control-label col-md-2">Department</label>
+      <div class="col-md-10">
+        <select class="form-control" name="departmentID" [(ngModel)]="course.departmentID"
+          required #departmentID="ngModel">
+        <option *ngFor="let dept of departments" [value]="dept.departmentID">  
+                  {{dept.name}}
+        </option>
+        </select>
+        <div *ngIf="departmentID.errors && (departmentID.dirty || departmentID.touched)" class="alert alert-danger validation-message">
+          <div [hidden]="!departmentID.errors.required">
+            Department is required
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="title" class="col-md-2 control-label">Title</label>
+      <div class="col-md-10">
+        <input name="title" [(ngModel)]="course.title" class="form-control"
+          required #title="ngModel" />
+        <div *ngIf="title.errors && (title.dirty || title.touched)" class="alert alert-danger validation-message">
+          <div [hidden]="!title.errors.required">
+            Title is required
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-md-offset-2 col-md-10">
+        <input type="submit" [disabled]="!courseForm.form.valid" value="Save" class="btn btn-default" />
+      </div>
+    </div>
+  </div>
+</form>
+
+<div>
+  <a [routerLink]="['/courses']">Back to List</a>
+</div>

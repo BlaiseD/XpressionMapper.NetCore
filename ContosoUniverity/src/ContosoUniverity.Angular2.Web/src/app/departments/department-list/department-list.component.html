@@ -1,0 +1,29 @@
+<h2>{{title}}</h2>
+
+<p>
+  <a [routerLink]="['/department-create']">Create New</a>
+</p>
+<table class="table" *ngIf='departments && departments.length'>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Budget</th>
+      <th>Administrator</th>
+      <th>Start Date</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor='let department of departments'>
+      <td>{{ department.name }}</td>
+      <td>{{ department.budget | currency:'USD':true:'1.2-2'}}</td>
+      <td>{{ department.administratorName }}</td>
+      <td>{{ department.startDate | date: 'MM/dd/yyyy'}}</td>
+      <td>
+        <a [routerLink]="['/department-edit', department.departmentID]">Edit</a> |
+        <a [routerLink]="['/department-detail', department.departmentID]">Details</a> |
+        <a [routerLink]="['/department-delete', department.departmentID]">Delete</a>
+      </td>
+    </tr>
+  </tbody>
+</table>

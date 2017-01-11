@@ -1,0 +1,41 @@
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+  <h4>{{title}}</h4>
+  <hr />
+  <dl class="dl-horizontal" *ngIf='department'>
+    <dt>
+      Budget
+    </dt>
+    <dd>
+      {{department.budget | currency:'USD':true:'1.2-2'}}
+    </dd>
+    <dt>
+      Name
+    </dt>
+    <dd>
+      {{department.name}}
+    </dd>
+    <dt>
+      Administrator
+    </dt>
+    <dd>
+      {{department.administratorName}}
+    </dd>
+    <dt>
+      Start Date
+    </dt>
+    <dd>
+      {{department.startDate | date: 'MM/dd/yyyy'}}
+    </dd>
+  </dl>
+</div>
+
+<form (ngSubmit)="submitClick()">
+  <div>
+    <input type="submit" value="Delete" class="btn btn-default" /> |
+    <a [routerLink]="['/departments']">Back to List</a>
+  </div>
+
+</form>
