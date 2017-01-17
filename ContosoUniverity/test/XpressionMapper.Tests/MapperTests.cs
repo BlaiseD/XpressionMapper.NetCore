@@ -4,8 +4,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using XpressionMapper.Extensions;
 using Xunit;
+using XpressionMapper.Extensions;
 
 namespace XpressionMapper.Tests
 {
@@ -15,10 +15,10 @@ namespace XpressionMapper.Tests
         {
             SetupAutoMapper();
         }
-        //a => a.Include(x => x.Enrollments).ThenInclude(x => x.Select(y => y.Course)))
+
         #region Tests
         [Fact]
-        public void Map_Then_Inclues1()
+        public void Map_then_inclues_as_expression()
         {
 
             //Arrange
@@ -26,24 +26,20 @@ namespace XpressionMapper.Tests
 
             //Act
             Expression<Func<IQueryable<Account>, Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Account, ICollection<Thing>>>> selectionMapped =
-                mapper.MapExpression<Func<IQueryable<AccountModel>, Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<AccountModel, ICollection<ThingModel>>>,
-                Func<IQueryable<Account>, Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Account, ICollection<Thing>>>>(selections);
+                mapper.MapExpression<Expression<Func<IQueryable<Account>, Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Account, ICollection<Thing>>>>>(selections);
 
             //Assert
             Assert.NotNull(selectionMapped);
         }
         [Fact]
-        public void Map_Then_Inclues()
+        public void Map_then_inclues_as_include()
         {
-            //Expression<Func<IQueryable<AccountModel>, Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<AccountModel, object>>> selections = a => a.Include(x => x.ThingModels);
             //Arrange
-            //Expression<Func<IQueryable<AccountModel>, Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<AccountModel, object>>> selections = a => a.Include(x => x.ThingModels).ThenInclude(x => x.Select<ThingModel, object>(y => y.Color));
-            Expression<Func<IQueryable<AccountModel>, Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<AccountModel, object>>> selections = a => a.Include(x => x.ThingModels).ThenInclude(y => y.Car);
+            Expression<Func<IQueryable<AccountModel>, Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<AccountModel, object>>> selections = a => a.Include(x => x.ThingModels).ThenInclude(y => y.Color);
 
             //Act
             Expression<Func<IQueryable<Account>, Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Account, object>>> selectionMapped =
-                mapper.MapExpressionAsInclude<Func<IQueryable<AccountModel>, Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<AccountModel, object>>,
-                Func<IQueryable<Account>, Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Account, object>>>(selections);
+                mapper.MapExpressionAsInclude<Expression<Func<IQueryable<Account>, Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Account, object>>>>(selections);
 
             //Assert
             Assert.NotNull(selectionMapped);
@@ -56,59 +52,59 @@ namespace XpressionMapper.Tests
             ICollection<Expression<Func<UserModel, object>>> selections = new List<Expression<Func<UserModel, object>>>() { s => s.AccountModel.Bal, s => s.AccountName };
 
             //Act
-            ICollection<Expression<Func<User, object>>> selectionsMapped = mapper.MapIncludesList<Func<UserModel, object>, Func<User, object>>(selections);
+            ICollection<Expression<Func<User, object>>> selectionsMapped = mapper.MapIncludesList<Expression<Func<User, object>>>(selections);
 
             //Assert
             Assert.NotNull(selectionsMapped);
         }
 
         [Fact]
-        public void Map_includes_list_2()
+        public void Map_includes_list_with_select()
         {
             //Arrange
             ICollection<Expression<Func<UserModel, object>>> selections = new List<Expression<Func<UserModel, object>>>() { s => s.AccountModel.Bal, s => s.AccountName, s => s.AccountModel.ThingModels.Select<ThingModel, object>(x => x.Color) };
 
             //Act
-            ICollection<Expression<Func<User, object>>> selectionsMapped = mapper.MapIncludesList<Func<UserModel, object>, Func<User, object>>(selections);
+            ICollection<Expression<Func<User, object>>> selectionsMapped = mapper.MapIncludesList<Expression<Func<User, object>>>(selections);
 
             //Assert
             Assert.NotNull(selectionsMapped);
         }
 
         [Fact]
-        public void Map_includes_trim_value_types()
+        public void Map_includes_with_value_types()
         {
             //Arrange
             Expression<Func<UserModel, object>> selection = s => s.AccountModel.Bal;
 
             //Act
-            Expression<Func<User, object>> selectionMapped = mapper.MapExpressionAsInclude<Func<UserModel, object>, Func<User, object>>(selection);
+            Expression<Func<User, object>> selectionMapped = mapper.MapExpressionAsInclude<Expression<Func<User, object>>>(selection);
 
             //Assert
             Assert.NotNull(selectionMapped);
         }
 
         [Fact]
-        public void Map_includes_trim_string()
+        public void Map_includes_with_string()
         {
             //Arrange
             Expression<Func<UserModel, object>> selection = s => s.AccountName;
 
             //Act
-            Expression<Func<User, object>> selectionMapped = mapper.MapExpressionAsInclude<Func<UserModel, object>, Func<User, object>>(selection);
+            Expression<Func<User, object>> selectionMapped = mapper.MapExpressionAsInclude<Expression<Func<User, object>>>(selection);
 
             //Assert
             Assert.NotNull(selectionMapped);
         }
 
         [Fact]
-        public void Map_includes_trim_string_nested()
+        public void Map_includes_trim_string_nested_in_select()
         {
             //Arrange
             Expression<Func<UserModel, object>> selection = s => s.AccountModel.ThingModels.Select<ThingModel, object>(x => x.Color);
 
             //Act
-            Expression<Func<User, object>> selectionMapped = mapper.MapExpressionAsInclude<Func<UserModel, object>, Func<User, object>>(selection);
+            Expression<Func<User, object>> selectionMapped = mapper.MapExpressionAsInclude<Expression<Func<User, object>>>(selection);
 
             //Assert
             Assert.NotNull(selectionMapped);
@@ -121,20 +117,20 @@ namespace XpressionMapper.Tests
             Expression<Func<UserModel, bool>> selection = s => s.LoggedOn == "Y";
 
             //Act
-            Expression<Func<User, bool>> selectionMapped = mapper.MapExpression<Func<UserModel, bool>, Func<User, bool>>(selection);
+            Expression<Func<User, bool>> selectionMapped = mapper.MapExpression<Expression<Func<User, bool>>>(selection);
 
             //Assert
             Assert.NotNull(selectionMapped);
         }
 
         [Fact]
-        public void Map_object_type_change_2()
+        public void Map_object_type_change_again()
         {
             //Arrange
             Expression<Func<UserModel, bool>> selection = s => s.IsOverEighty;
 
             //Act
-            Expression<Func<User, bool>> selectionMapped = mapper.MapExpression<Func<UserModel, bool>, Func<User, bool>>(selection);
+            Expression<Func<User, bool>> selectionMapped = mapper.MapExpression<Expression<Func<User, bool>>>(selection);
 
             //Assert
             Assert.NotNull(selectionMapped);
@@ -147,7 +143,7 @@ namespace XpressionMapper.Tests
             Expression<Func<UserModel, bool>> selection = s => s != null && s.AccountModel != null && s.AccountModel.Bal == 555.20;
 
             //Act
-            Expression<Func<User, bool>> selectionMapped = mapper.MapExpression<Func<UserModel, bool>, Func<User, bool>>(selection);
+            Expression<Func<User, bool>> selectionMapped = mapper.MapExpression<Expression<Func<User, bool>>>(selection);
 
             //Assert
             Assert.NotNull(selectionMapped);
@@ -160,7 +156,7 @@ namespace XpressionMapper.Tests
             Expression<Func<UserModel, bool>> selection = s => s != null && s.AccountModel != null && s.AccountModel.DateCreated == DateTime.Now;
 
             //Act
-            Expression<Func<User, bool>> selectionMapped = mapper.MapExpression<Func<UserModel, bool>, Func<User, bool>>(selection);
+            Expression<Func<User, bool>> selectionMapped = mapper.MapExpression<Expression<Func<User, bool>>>(selection);
 
             //Assert
             Assert.NotNull(selectionMapped);
@@ -170,11 +166,10 @@ namespace XpressionMapper.Tests
         public void Map_projection()
         {
             //Arrange
-            //Expression<Func<UserModel, bool>> selection = s => s != null && string.Concat("ZZZ", s.FullName, " ", "ZZZ").StartsWith("A");
             Expression<Func<UserModel, bool>> selection = s => s != null && s.AccountModel.ComboName.StartsWith("A");
 
             //Act
-            Expression<Func<User, bool>> selectionMapped = mapper.MapExpression<Func<UserModel, bool>, Func<User, bool>>(selection);
+            Expression<Func<User, bool>> selectionMapped = mapper.MapExpression<Expression<Func<User, bool>>>(selection);
 
             //Assert
             Assert.NotNull(selectionMapped);
@@ -188,20 +183,7 @@ namespace XpressionMapper.Tests
             Expression<Func<UserModel, bool>> selection = s => ((s != null ? s.AccountName : null) ?? "").ToLower().StartsWith("A".ToLower()) && ((s.AgeInYears == age) && s.IsActive);
 
             //Act
-            Expression<Func<User, bool>> selectionMapped = mapper.MapExpression<Func<UserModel, bool>, Func<User, bool>>(selection);
-
-            //Assert
-            Assert.NotNull(selectionMapped);
-        }
-
-        [Fact]
-        public void Map__flattened_property_2()
-        {
-            //Arrange
-            Expression<Func<UserModel, object>> selection = s => s.AccountModel.Id;
-
-            //Act
-            Expression<Func<User, object>> selectionMapped = mapper.MapExpression<Func<UserModel, object>, Func<User, object>>(selection);
+            Expression<Func<User, bool>> selectionMapped = mapper.MapExpression<Expression<Func<User, bool>>>(selection);
 
             //Assert
             Assert.NotNull(selectionMapped);
@@ -214,33 +196,33 @@ namespace XpressionMapper.Tests
             Expression<Func<UserModel, object>> selection = s => s.AccountModel.ThingModels.Select(x => x.BarModel);
 
             //Act
-            Expression<Func<User, object>> selectionMapped = mapper.MapExpression<Func<UserModel, object>, Func<User, object>>(selection);
+            Expression<Func<User, object>> selectionMapped = mapper.MapExpression<Expression<Func<User, object>>>(selection);
 
             //Assert
             Assert.NotNull(selectionMapped);
         }
 
         [Fact]
-        public void Map__select_method_2()
+        public void Map__select_method_projecting_to_anonymous_type()
         {
             //Arrange
             Expression<Func<UserModel, object>> selection = s => s.AccountModel.ThingModels.Select(x => new { MM = x.BarModel });
 
             //Act
-            Expression<Func<User, object>> selectionMapped = mapper.MapExpression<Func<UserModel, object>, Func<User, object>>(selection);
+            Expression<Func<User, object>> selectionMapped = mapper.MapExpression<Expression<Func<User, object>>>(selection);
 
             //Assert
             Assert.NotNull(selectionMapped);
         }
 
         [Fact]
-        public void Map__select_method_3()
+        public void Map__select_method_where_parent_type_is_grandchild_type()
         {
             //Arrange
             Expression<Func<UserModel, object>> selection = s => s.AccountModel.UserModels.Select(x => x.AgeInYears);
 
             //Act
-            Expression<Func<User, object>> selectionMapped = mapper.MapExpression<Func<UserModel, object>, Func<User, object>>(selection);
+            Expression<Func<User, object>> selectionMapped = mapper.MapExpression<Expression<Func<User, object>>>(selection);
 
             //Assert
             Assert.NotNull(selectionMapped);
@@ -253,26 +235,24 @@ namespace XpressionMapper.Tests
             Expression<Func<UserModel, object>> selection = s => s.AccountModel.ThingModels.Where(x => x.BarModel == s.AccountName);
 
             //Act
-            Expression<Func<User, object>> selectionMapped = mapper.MapExpression<Func<UserModel, object>, Func<User, object>>(selection);
+            Expression<Func<User, object>> selectionMapped = mapper.MapExpression<Expression<Func<User, object>>>(selection);
 
             //Assert
             Assert.NotNull(selectionMapped);
         }
 
         [Fact]
-        public void Map_where_method2()
+        public void Map_where_multiple_arguments()
         {
             //Arrange
             Expression<Func<UserModel, AccountModel, object>> selection = (u, s) => u.FullName == s.Bal.ToString();
 
             //Act
-            Expression<Func<User, Account, object>> selectionMapped = mapper.MapExpression<Func<UserModel, AccountModel, object>, Func<User, Account, object>>(selection);
+            Expression<Func<User, Account, object>> selectionMapped = mapper.MapExpression<Expression<Func<User, Account, object>>>(selection);
 
             //Assert
             Assert.NotNull(selectionMapped);
         }
-
-
 
         [Fact]
         public void Map_orderBy_thenBy_expression()
@@ -281,7 +261,7 @@ namespace XpressionMapper.Tests
             Expression<Func<IQueryable<UserModel>, IQueryable<UserModel>>> exp = q => q.OrderBy(s => s.Id).ThenBy(s => s.FullName);
 
             //Act
-            Expression<Func<IQueryable<User>, IQueryable<User>>> expMapped = mapper.MapExpression<Func<IQueryable<UserModel>, IQueryable<UserModel>>, Func<IQueryable<User>, IQueryable<User>>>(exp);
+            Expression<Func<IQueryable<User>, IQueryable<User>>> expMapped = mapper.MapExpression<Expression<Func<IQueryable<User>, IQueryable<User>>>>(exp);
 
             //Assert
             Assert.NotNull(expMapped);
@@ -294,7 +274,7 @@ namespace XpressionMapper.Tests
             Expression<Func<IQueryable<UserModel>, IQueryable<IGrouping<int, UserModel>>>> grouped = q => q.OrderBy(s => s.Id).ThenBy(s => s.FullName).GroupBy(s => s.AgeInYears);
 
             //Act
-            Expression<Func<IQueryable<User>, IQueryable<IGrouping<int, User>>>> expMapped = mapper.MapExpression<Func<IQueryable<UserModel>, IQueryable<IGrouping<int, UserModel>>>, Func<IQueryable<User>, IQueryable<IGrouping<int, User>>>>(grouped);
+            Expression<Func<IQueryable<User>, IQueryable<IGrouping<int, User>>>> expMapped = mapper.MapExpression<Expression<Func<IQueryable<User>, IQueryable<IGrouping<int, User>>>>>(grouped);
 
             //Assert
             Assert.NotNull(expMapped);
@@ -307,47 +287,84 @@ namespace XpressionMapper.Tests
             Expression<Func<IQueryable<UserModel>, dynamic>> exp = q => q.OrderBy(s => s.Id).ThenBy(s => s.FullName);
 
             //Act
-            Expression<Func<IQueryable<User>, dynamic>> expMapped = mapper.MapExpression<Func<IQueryable<UserModel>, dynamic>, Func<IQueryable<User>, dynamic>>(exp);
+            Expression<Func<IQueryable<User>, dynamic>> expMapped = mapper.MapExpression<Expression<Func<IQueryable<User>, dynamic>>>(exp);
 
             //Assert
             Assert.NotNull(expMapped);
         }
 
         [Fact]
-        public void Test_model_to_view_model()
-        {
-            //Arrange
-            UserM userM = new UserM { Active = true, Age = 25, IsLoggedOn = false, Name = "Jack", UserId = 7 };
-
-            //Act
-            UserVM userVM = mapper.Map<UserVM>(userM);
-
-            //Assert
-            Assert.True(userVM.Age == userM.Age);
-        }
-
-        [Fact]
-        public void Test_view_model_to_model()
-        {
-            //Arrange
-            UserVM userVM = new UserVM { Active = true, Age = 25, IsLoggedOn = false, Name = "Jack" };
-            UserM userM = new UserM { Active = true, Age = 21, IsLoggedOn = false, Name = "Jack", UserId = 7 };
-
-            //Act
-            UserM userB = mapper.Map<UserVM, UserM>(userVM, userM);
-
-            //Assert
-            Assert.True(userB.Age == userVM.Age);
-        }
-
-        [Fact]
-        public void Map_Item()
+        public void Map_1821_when_mapping_expression_with_a_property_that_maps_to_a_string_type()
         {
             //Arrange
             Expression<Func<Item, object>> exp = x => x.Name;
 
             //Act
-            Expression<Func<ItemDto, object>> expMapped = mapper.MapExpression<Func<Item, object>, Func<ItemDto, object>>(exp);
+            Expression<Func<ItemDto, object>> expMapped = mapper.MapExpression<Expression<Func<ItemDto, object>>>(exp);
+
+            //Assert
+            Assert.NotNull(expMapped);
+        }
+
+        [Fact]
+        public void Map_1893_null_exception_with_deflattening()
+        {
+            //Arrange
+            Expression<Func<OrderLineDTO, bool>> dtoExpression = dto => dto.Item.Name == "Item #1";
+
+            //Act
+            Expression<Func<OrderLine, bool>> expression = mapper.MapExpression<Expression<Func<OrderLine, bool>>>(dtoExpression);
+
+            //Assert
+            Assert.NotNull(expression);
+        }
+
+        [Fact]
+        public void Map_parentDto_to_parent()
+        {
+            //Arrange
+            Expression<Func<ParentDTO, bool>> exp = p => (p.DateTime.Year.ToString() != String.Empty);
+            //Act
+            Expression<Func<Parent, bool>> expMapped = mapper.MapExpression<Expression<Func<Parent, bool>>>(exp);
+
+            //Assert
+            Assert.NotNull(expMapped);
+        }
+
+        [Fact]
+        public void Map_parentDto_to_parent_with_index_argument()
+        {
+            //Arrange
+            var ids = new[] { 4, 5 };
+            Expression<Func<ParentDTO, bool>> exp = p => p.Children.Where((c, i) => c.ID_ > 4).Any(c => ids.Contains(c.ID_));
+            //Act
+            Expression<Func<Parent, bool>> expMapped = mapper.MapExpression<Expression<Func<Parent, bool>>>(exp);
+
+            //Assert
+            Assert.NotNull(expMapped);
+        }
+
+        [Fact]
+        public void Map_accountModel_to_account()
+        {
+            //Arrange
+            Expression<Func<AccountModel, bool>> exp = p => (p.DateCreated.Year.ToString() != String.Empty);
+
+            //Act
+            Expression<Func<Account, bool>> expMapped = mapper.MapExpression<Expression<Func<Account, bool>>>(exp);
+
+            //Assert
+            Assert.NotNull(expMapped);
+        }
+
+        [Fact]
+        public void When_use_lambda_statement_with_typemapped_property_being_other_than_first()
+        {
+            //Arrange
+            //Expression<Func<ParentDTO, bool>> exp = p => p.Children.AnyParamReverse((c2, c) => c.ID_ > c2.ID_ + 4);
+            Expression<Func<ParentDTO, bool>> exp = p => p.Children.AnyParamReverse((c, c2) => c.ID_ > 4);
+            //Act
+            Expression<Func<Parent, bool>> expMapped = mapper.MapExpression<Expression<Func<Parent, bool>>>(exp);
 
             //Assert
             Assert.NotNull(expMapped);
@@ -367,13 +384,21 @@ namespace XpressionMapper.Tests
         static IMapper mapper;
     }
 
+    public class CustomResolver : AutoMapper.IValueResolver<Account, AccountModel, string>
+    {
+        public string Resolve(Account source, AccountModel destination, string member, ResolutionContext context)
+        {
+            return string.Concat(source.FirstName, " ", source.LastName);
+        }
+    }
+
     public class Account
     {
         public Account()
         {
             Things = new List<Thing>();
         }
-        public int Id { get; set; }
+        public int AccountId { get; set; }
         public double Balance { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -474,13 +499,33 @@ namespace XpressionMapper.Tests
     public class UserModel
     {
         public int Id { get; set; }
-        public string FullName { get; set; }
+        public string FullName;// { get; set; }
         public string AccountName { get; set; }
         public bool IsOverEighty { get; set; }
         public string LoggedOn { get; set; }
         public int AgeInYears { get; set; }
         public bool IsActive { get; set; }
         public AccountModel AccountModel { get; set; }
+    }
+
+    public class OrderLine
+    {
+        public int Id { get; set; }
+        public string ItemName { get; set; }
+        public int Quantity { get; set; }
+    }
+
+    public class OrderLineDTO
+    {
+        public int Id { get; set; }
+        public ItemDTO Item { get; set; }
+        public int Quantity { get; set; }
+    }
+
+    public class ItemDTO
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 
     public class ItemDto
@@ -500,6 +545,68 @@ namespace XpressionMapper.Tests
         public string Name { get; set; }
 
         public DateTime Date { get; set; }
+    }
+
+    public class GrandParentDTO
+    {
+        public ParentDTO Parent { get; set; }
+    }
+    public class ParentDTO
+    {
+        public ICollection<ChildDTO> Children { get; set; }
+        public ChildDTO Child { get; set; }
+        public DateTime DateTime { get; set; }
+    }
+
+    public class ChildDTO
+    {
+        public ParentDTO Parent { get; set; }
+        public ChildDTO GrandChild { get; set; }
+        public int ID_ { get; set; }
+        public int? IDs { get; set; }
+        public int? ID2 { get; set; }
+    }
+
+    public class GrandParent
+    {
+        public Parent Parent { get; set; }
+    }
+
+    public class Parent
+    {
+        public ICollection<Child> Children { get; set; }
+
+        private Child _child;
+        public Child Child
+        {
+            get { return _child; }
+            set
+            {
+                _child = value;
+                _child.Parent = this;
+            }
+        }
+        public DateTime DateTime { get; set; }
+    }
+
+    public class Child
+    {
+        private Parent _parent;
+        public Parent Parent
+        {
+            get { return _parent; }
+            set
+            {
+                _parent = value;
+                if (GrandChild != null)
+                    GrandChild.Parent = _parent;
+            }
+        }
+
+        public int ID { get; set; }
+        public Child GrandChild { get; set; }
+        public int IDs { get; set; }
+        public int? ID2 { get; set; }
     }
 
     public class OrganizationProfile : Profile
@@ -526,6 +633,7 @@ namespace XpressionMapper.Tests
 
             CreateMap<Account, AccountModel>()
                 .ForMember(d => d.Bal, opt => opt.MapFrom(s => s.Balance))
+                .ForMember(d => d.Id, opt => opt.MapFrom(s => s.AccountId))
                 .ForMember(d => d.DateCreated, opt => opt.MapFrom(s => Helpers.TruncateTime(s.CreateDate).Value))
                 .ForMember(d => d.ComboName, opt => opt.MapFrom(s => string.Concat(s.FirstName, " ", s.LastName)))
                 //.ForMember(d => d.ComboName, opt => opt.ResolveUsing<CustomResolver>())
@@ -533,6 +641,7 @@ namespace XpressionMapper.Tests
                 .ForMember(d => d.UserModels, opt => opt.MapFrom(s => s.Users));
 
             CreateMap<AccountModel, Account>()
+                .ForMember(d => d.AccountId, opt => opt.MapFrom(s => s.Id))
                 .ForMember(d => d.Balance, opt => opt.MapFrom(s => s.Bal))
                 .ForMember(d => d.Things, opt => opt.MapFrom(s => s.ThingModels))
                 .ForMember(d => d.Users, opt => opt.MapFrom(s => s.UserModels));
@@ -552,12 +661,42 @@ namespace XpressionMapper.Tests
             CreateMap<Item, ItemDto>()
                 .ForMember(dest => dest.CreateDate, opts => opts.MapFrom(x => x.Date));
 
+            CreateMap<OrderLine, ItemDTO>()
+                .ForMember(dto => dto.Name, conf => conf.MapFrom(src => src.ItemName));
+            CreateMap<OrderLine, OrderLineDTO>()
+                .ForMember(dto => dto.Item, conf => conf.MapFrom(ol => ol));
+            CreateMap<OrderLineDTO, OrderLine>()
+                .ForMember(ol => ol.ItemName, conf => conf.MapFrom(dto => dto.Item.Name));
+
+            CreateMap<GrandParent, GrandParentDTO>().ReverseMap();
+            CreateMap<Parent, ParentDTO>()
+                .ForMember(dest => dest.DateTime, opts => opts.MapFrom(x => x.DateTime))
+                .ReverseMap()
+                .ForMember(dest => dest.DateTime, opts => opts.MapFrom(x => x.DateTime));
+            CreateMap<Child, ChildDTO>()
+                .ForMember(d => d.ID_, opt => opt.MapFrom(s => s.ID))
+                .ReverseMap()
+                .ForMember(d => d.ID, opt => opt.MapFrom(s => s.ID_));
+
             CreateMissingTypeMaps = true;
         }
-        //protected override void Configure()
-        //{
-        //    CreateMap<Foo, FooDto>();
-        //    // Use CreateMap... Etc.. here (Profile methods are the same as configuration methods)
-        //}
+    }
+
+    public static class GenericTestExtensionMethods
+    {
+        public static bool Any<T>(this IEnumerable<T> self, Func<T, int, bool> func)
+        {
+            return self.Where(func).Any();
+        }
+
+        public static bool AnyParamReverse<T>(this IEnumerable<T> self, Func<T, T, bool> func)
+        {
+            return self.Any(t => func(t, t));
+        }
+
+        public static bool Lambda<T>(this T self, Func<T, bool> func)
+        {
+            return func(self);
+        }
     }
 }

@@ -22,9 +22,9 @@ namespace ContosoUniversity.Repositories
             where TData : BaseData
         {
             //Map the expressions
-            Expression<Func<TData, bool>> f = mapper.MapExpression<Func<TModel, bool>, Func<TData, bool>>(filter);
-            Expression<Func<IQueryable<TData>, IQueryable<TData>>> mappedQueryFunc = mapper.MapExpression<Func<IQueryable<TModel>, IQueryable<TModel>>, Func<IQueryable<TData>, IQueryable<TData>>>(queryFunc);
-            ICollection<Expression<Func<IQueryable<TData>, IIncludableQueryable<TData, object>>>> includes = mapper.MapIncludesList<Func<IQueryable<TModel>, IIncludableQueryable<TModel, object>>, Func<IQueryable<TData>, IIncludableQueryable<TData, object>>>(includeProperties);
+            Expression<Func<TData, bool>> f = mapper.MapExpression<Expression<Func<TData, bool>>>(filter);
+            Expression<Func<IQueryable<TData>, IQueryable<TData>>> mappedQueryFunc = mapper.MapExpression<Expression<Func<IQueryable<TData>, IQueryable<TData>>>>(queryFunc);
+            ICollection<Expression<Func<IQueryable<TData>, IIncludableQueryable<TData, object>>>> includes = mapper.MapIncludesList<Expression<Func<IQueryable<TData>, IIncludableQueryable<TData, object>>>>(includeProperties);
 
             //Call the store
             ICollection<TData> list = await store.GetAsync(f,
@@ -42,8 +42,8 @@ namespace ContosoUniversity.Repositories
             where TData : BaseData
         {
             //Map the expressions
-            Expression<Func<IQueryable<TData>, dynamic>> mappedQueryFunc = mapper.MapExpression<Func<IQueryable<TModel>, dynamic>, Func<IQueryable<TData>, dynamic>>(queryFunc);
-            ICollection<Expression<Func<IQueryable<TData>, IIncludableQueryable<TData, object>>>> includes = mapper.MapIncludesList<Func<IQueryable<TModel>, IIncludableQueryable<TModel, object>>, Func<IQueryable<TData>, IIncludableQueryable<TData, object>>>(includeProperties);
+            Expression<Func<IQueryable<TData>, dynamic>> mappedQueryFunc = mapper.MapExpression<Expression<Func<IQueryable<TData>, dynamic>>>(queryFunc);
+            ICollection<Expression<Func<IQueryable<TData>, IIncludableQueryable<TData, object>>>> includes = mapper.MapIncludesList<Expression<Func<IQueryable<TData>, IIncludableQueryable<TData, object>>>>(includeProperties);
 
             //Call the store
             object result = await store.QueryAsync(mappedQueryFunc == null ? null : mappedQueryFunc.Compile(),
@@ -64,7 +64,7 @@ namespace ContosoUniversity.Repositories
             where TModel : BaseModel
             where TData : BaseData
         {
-            Expression<Func<TData, bool>> f = mapper.MapExpression<Func<TModel, bool>, Func<TData, bool>>(filter);
+            Expression<Func<TData, bool>> f = mapper.MapExpression<Expression<Func<TData, bool>>>(filter);
             return await store.CountAsync(f);
         }
 
@@ -111,7 +111,7 @@ namespace ContosoUniversity.Repositories
             where TModel : BaseModel
             where TData : BaseData
         {
-            Expression<Func<TData, bool>> f = mapper.MapExpression<Func<TModel, bool>, Func<TData, bool>>(filter);
+            Expression<Func<TData, bool>> f = mapper.MapExpression<Expression<Func<TData, bool>>>(filter);
             List<TData> list = (await store.GetAsync(f)).ToList();
             list.ForEach(item => { item.EntityState = ContosoUniversity.Data.EntityStateType.Deleted; });
             return await store.SaveAsync<TData>(list);

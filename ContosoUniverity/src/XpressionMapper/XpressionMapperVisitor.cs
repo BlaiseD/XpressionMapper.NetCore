@@ -81,15 +81,30 @@ namespace XpressionMapper
             FindDestinationFullName(sType, infoDictionary[parameterExpression].DestType, sourcePath, propertyMapInfoList);
             string fullName = null;
 
-            if (propertyMapInfoList[propertyMapInfoList.Count - 1].CustomExpression != null)
+            if (propertyMapInfoList.Any(x => x.CustomExpression != null))
             {
-                PropertyMapInfo last = propertyMapInfoList[propertyMapInfoList.Count - 1];
-                propertyMapInfoList.Remove(last);
+                PropertyMapInfo last = propertyMapInfoList.Last(x => x.CustomExpression != null);
+                List<PropertyMapInfo> beforeCustExpression = propertyMapInfoList.Aggregate(new List<PropertyMapInfo>(), (list, next) =>
+                {
+                    if (propertyMapInfoList.IndexOf(next) < propertyMapInfoList.IndexOf(last))
+                        list.Add(next);
+                    return list;
+                });
 
-                //Get the fullname of the reference object - this means building the reference name from all but the last expression.
-                fullName = BuildFullName(propertyMapInfoList);
+                List<PropertyMapInfo> afterCustExpression = propertyMapInfoList.Aggregate(new List<PropertyMapInfo>(), (list, next) =>
+                {
+                    if (propertyMapInfoList.IndexOf(next) > propertyMapInfoList.IndexOf(last))
+                        list.Add(next);
+                    return list;
+                });
+
+                fullName = BuildFullName(beforeCustExpression);
                 PrependParentNameVisitor visitor = new PrependParentNameVisitor(infoDictionary[parameterExpression].DestType, last.CustomExpression.Parameters[0].Type/*Parent type of current property*/, fullName, infoDictionary[parameterExpression].NewParameter);
-                Expression ex = visitor.Visit(last.CustomExpression.Body);
+
+                Expression ex = propertyMapInfoList[propertyMapInfoList.Count - 1] != last
+                    ? ex = visitor.Visit(last.CustomExpression.Body.AddExpressions(afterCustExpression))
+                    : ex = visitor.Visit(last.CustomExpression.Body);
+
                 return ex;
             }
             else
@@ -136,36 +151,7 @@ namespace XpressionMapper
             List<Expression> listOfArgumentsForNewMethod = node.Arguments.Aggregate(new List<Expression>(), (lst, next) =>
             {
                 Expression mappedNext = ArgumentMapper.Create(this, next).MappedArgumentExpression;
-                List<Type> sourceArguments = next.Type.GetTypeInfo().GetGenericArguments().ToList();
-                List<Type> destArguments = mappedNext.Type.GetTypeInfo().GetGenericArguments().ToList();
-                if (sourceArguments != null && sourceArguments.Count > 0)
-                {
-                    for (int i=0; i< sourceArguments.Count; i++)
-                    {
-                        if (typeof(Delegate).GetTypeInfo().IsAssignableFrom(sourceArguments[i]))
-                        {
-                            List<Type> sources = sourceArguments[i].GetTypeInfo().GetGenericArguments().ToList();
-                            List<Type> dests= destArguments[i].GetTypeInfo().GetGenericArguments().ToList();
-                            if (sources != null && sources.Count > 0)
-                            {
-                                for (int j = 0; j < sources.Count; j++)
-                                    this.TypeMappings.AddTypeMapping(sources[j], dests[j]);
-                            }
-                        }
-                        {
-                            this.TypeMappings.AddTypeMapping(sourceArguments[i], destArguments[i]);
-                        }
-                    }
-                }
-
-                if (isExtension && lst.Count == 0)
-                {
-                    Type typeSource = next.Type.GetUnderlyingGenericType();
-                    Type typeDest = mappedNext.Type.GetUnderlyingGenericType();
-
-                    if (typeSource != null && typeDest != null)
-                        this.TypeMappings.AddTypeMapping(typeSource, typeDest);
-                }
+                this.TypeMappings.AddTypeMapping(next.Type, mappedNext.Type);
 
                 lst.Add(mappedNext);
                 return lst;
@@ -208,7 +194,7 @@ namespace XpressionMapper
                         ? info.CustomExpression.GetMemberFullName()
                         : string.Concat(fullName, ".", info.CustomExpression.GetMemberFullName());
                 }
-                else
+                else //if (info.DestinationPropertyInfo != null)
                 {
                     fullName = string.IsNullOrEmpty(fullName)
                         ? info.DestinationPropertyInfo.Name
@@ -218,58 +204,68 @@ namespace XpressionMapper
 
             return fullName;
         }
-        
+
+        private void AddPropertyMapInfo(Type parentType, string name, List<PropertyMapInfo> propertyMapInfoList)
+        {
+            MemberInfo sourceMemberInfo = parentType.GetMember(name).First();
+            MethodInfo methodInfo = null;
+            PropertyInfo propertyInfo = null;
+            FieldInfo fieldInfo = null;
+            if ((methodInfo = sourceMemberInfo as MethodInfo) != null)
+                propertyMapInfoList.Add(new PropertyMapInfo(null, methodInfo));
+            if ((propertyInfo = sourceMemberInfo as PropertyInfo) != null)
+                propertyMapInfoList.Add(new PropertyMapInfo(null, propertyInfo));
+            if ((fieldInfo = sourceMemberInfo as FieldInfo) != null)
+                propertyMapInfoList.Add(new PropertyMapInfo(null, fieldInfo));
+        }
+
         protected void FindDestinationFullName(Type typeSource, Type typeDestination, string sourceFullName, List<PropertyMapInfo> propertyMapInfoList)
         {
             const string PERIOD = ".";
+            if (typeSource == typeDestination)
+            {
+                string[] sourceFullNameArray = sourceFullName.Split(new char[] { PERIOD[0] }, StringSplitOptions.RemoveEmptyEntries);
+                propertyMapInfoList = sourceFullNameArray.Aggregate(propertyMapInfoList, (list, next) =>
+                {
+
+                    if (list.Count == 0)
+                    {
+                        AddPropertyMapInfo(typeSource,  next, list);
+                    }
+                    else
+                    {
+                        AddPropertyMapInfo(list[list.Count - 1].CustomExpression == null
+                            ? list[list.Count - 1].DestinationPropertyInfo.GetMemberType()
+                            : list[list.Count - 1].CustomExpression.ReturnType, next, list);
+                    }
+                    return list;
+                });
+                return;
+            }
+
             TypeMap typeMap = this.ConfigurationProvider.FindTypeMapFor(typeDestination, typeSource);//The destination becomes the source because to map a source expression to a destination expression,
             //we need the expressions used to create the source from the destination 
 
             if (sourceFullName.IndexOf(PERIOD) < 0)
             {
                 PropertyMap propertyMap = typeMap.GetPropertyMaps().SingleOrDefault(item => item.DestinationProperty.Name == sourceFullName);
+                MemberInfo sourceMemberInfo = typeSource.GetMember(propertyMap.DestinationProperty.Name).First();
                 if (propertyMap.ValueResolverConfig != null)
                 {
                     #region Research
-                    /*TypeMapPlanBuilder builder = new TypeMapPlanBuilder(this.ConfigurationProvider, null, typeMap);
-            MethodCallExpression e = (MethodCallExpression)builder.CreatePropertyMapFunc(propertyMap);
-
-            ParameterExpression pe = e.GetParameterExpression();*/
-                    //propertyMap.SetCustomValueResolverExpression(builder.CreatePropertyMapFunc(propertyMap));
-                    //System.Reflection.MethodInfo mi = propertyMap.ValueResolverConfig.Type.GetMethod("Resolve");
-                    ////object o = Activator.CreateInstance(type);
-                    ////mi.Invoke(o, null);
-                    ////Expression.Call(node.Method.DeclaringType, node.Method.Name, typeArgsForNewMethod.ToArray(), listOfArgumentsForNewMethod.ToArray())
-                    //bool canResolve = propertyMap.CanResolveValue();
-                    //Type resolverType = propertyMap.ValueResolverConfig.Type;
-                    //var iResolverType = resolverType.GetTypeInfo()
-                    //        .ImplementedInterfaces.First(t => t.GetTypeInfo().IsGenericType && t.GetGenericTypeDefinition() == typeof(IValueResolver<,,>));
-
-                    //var sourceResolverParam = iResolverType.GetGenericArguments()[0];
-                    //var destResolverParam = iResolverType.GetGenericArguments()[1];
-                    //var destMemberResolverParam = iResolverType.GetGenericArguments()[2];
-
-
-                    //Expression valueResolverFunc =
-                    //    ToType(Expression.Call(ToType(ctor, resolverType), iResolverType.GetDeclaredMethod("Resolve"),
-                    //        ToType(_source, sourceResolverParam),
-                    //        ToType(_destination, destResolverParam),
-                    //        ToType(destValueExpr, destMemberResolverParam),
-                    //        _context),
-                    //        destinationPropertyType); 
                     #endregion
 
                     throw new InvalidOperationException(Resource.customResolversNotSupported);
                 }
                 else if (propertyMap.CustomExpression != null)
                 {
-                    if (propertyMap.CustomExpression.ReturnType.GetTypeInfo().IsValueType && typeSource.GetTypeInfo().GetProperty(propertyMap.DestinationProperty.Name).PropertyType != propertyMap.CustomExpression.ReturnType)
-                        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.expressionMapValueTypeMustMatchFormat, propertyMap.CustomExpression.ReturnType.Name, propertyMap.CustomExpression.ToString(), typeSource.GetTypeInfo().GetProperty(propertyMap.DestinationProperty.Name).PropertyType.Name, propertyMap.DestinationProperty.Name));
+                    if (propertyMap.CustomExpression.ReturnType.IsValueType() && sourceMemberInfo.GetMemberType() != propertyMap.CustomExpression.ReturnType)
+                        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.expressionMapValueTypeMustMatchFormat, propertyMap.CustomExpression.ReturnType.Name, propertyMap.CustomExpression.ToString(), sourceMemberInfo.GetMemberType().Name, propertyMap.DestinationProperty.Name));
                 }
                 else
                 {
-                    if (((PropertyInfo)propertyMap.SourceMember).PropertyType.GetTypeInfo().IsValueType && typeSource.GetTypeInfo().GetProperty(propertyMap.DestinationProperty.Name).PropertyType != ((PropertyInfo)propertyMap.SourceMember).PropertyType)
-                        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.expressionMapValueTypeMustMatchFormat, ((PropertyInfo)propertyMap.SourceMember).PropertyType.Name, propertyMap.SourceMember.Name, typeSource.GetTypeInfo().GetProperty(propertyMap.DestinationProperty.Name).PropertyType.Name, propertyMap.DestinationProperty.Name));
+                    if (propertyMap.SourceMember.GetMemberType().IsValueType() && sourceMemberInfo.GetMemberType() != propertyMap.SourceMember.GetMemberType())
+                        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.expressionMapValueTypeMustMatchFormat, propertyMap.SourceMember.GetMemberType().Name, propertyMap.SourceMember.Name, sourceMemberInfo.GetMemberType().Name, propertyMap.DestinationProperty.Name));
                 }
 
                 propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.CustomExpression, propertyMap.SourceMember));
@@ -278,12 +274,17 @@ namespace XpressionMapper
             {
                 string propertyName = sourceFullName.Substring(0, sourceFullName.IndexOf(PERIOD));
                 PropertyMap propertyMap = typeMap.GetPropertyMaps().SingleOrDefault(item => item.DestinationProperty.Name == propertyName);
-                if (propertyMap.SourceMember == null)//If sourceFullName has a period then the SourceMember cannot be null.  The SourceMember is required to find the ProertyMap of its child object.
+
+                MemberInfo sourceMemberInfo = typeSource.GetMember(propertyMap.DestinationProperty.Name).First();
+                if (propertyMap.CustomExpression == null && propertyMap.SourceMember == null)//If sourceFullName has a period then the SourceMember cannot be null.  The SourceMember is required to find the ProertyMap of its child object.
                     throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.srcMemberCannotBeNullFormat, typeSource.Name, typeDestination.Name, propertyName));
 
                 propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.CustomExpression, propertyMap.SourceMember));
                 string childFullName = sourceFullName.Substring(sourceFullName.IndexOf(PERIOD) + 1);
-                FindDestinationFullName(typeSource.GetTypeInfo().GetProperty(propertyMap.DestinationProperty.Name).PropertyType, ((PropertyInfo)propertyMap.SourceMember).PropertyType, childFullName, propertyMapInfoList);
+
+                FindDestinationFullName(sourceMemberInfo.GetMemberType(), propertyMap.CustomExpression == null
+                    ? propertyMap.SourceMember.GetMemberType()
+                    : propertyMap.CustomExpression.ReturnType, childFullName, propertyMapInfoList);
             }
         }
         #endregion Private Methods

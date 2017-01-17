@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace XpressionMapper.Structures
@@ -11,7 +12,6 @@ namespace XpressionMapper.Structures
             this.DestinationPropertyInfo = DestinationPropertyInfo;
         }
 
-        public Expression ResolveExpression { get; set; }
         public LambdaExpression CustomExpression { get; set; }
         public MemberInfo DestinationPropertyInfo { get; set; }
     }

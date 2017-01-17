@@ -5,6 +5,7 @@ using System.Reflection;
 using AutoMapper;
 using XpressionMapper.Extensions;
 using XpressionMapper.Structures;
+using System.Linq;
 
 namespace XpressionMapper
 {
@@ -70,17 +71,34 @@ namespace XpressionMapper
             FindDestinationFullName(sType, InfoDictionary[parameterExpression].DestType, sourcePath, propertyMapInfoList);
             string fullName = null;
 
-            if (propertyMapInfoList[propertyMapInfoList.Count - 1].CustomExpression != null)//CustomExpression takes precedence over DestinationPropertyInfo
+            if (propertyMapInfoList.Any(x => x.CustomExpression != null))//CustomExpression takes precedence over DestinationPropertyInfo
             {
-                PropertyMapInfo last = propertyMapInfoList[propertyMapInfoList.Count - 1];
-                propertyMapInfoList.Remove(last);
+                PropertyMapInfo last = propertyMapInfoList.Last(x => x.CustomExpression != null);
+                List<PropertyMapInfo> beforeCustExpression = propertyMapInfoList.Aggregate(new List<PropertyMapInfo>(), (list, next) =>
+                {
+                    if (propertyMapInfoList.IndexOf(next) < propertyMapInfoList.IndexOf(last))
+                        list.Add(next);
+                    return list;
+                });
+
+                List<PropertyMapInfo> afterCustExpression = propertyMapInfoList.Aggregate(new List<PropertyMapInfo>(), (list, next) =>
+                {
+                    if (propertyMapInfoList.IndexOf(next) > propertyMapInfoList.IndexOf(last))
+                        list.Add(next);
+                    return list;
+                });
+
+
+                fullName = BuildFullName(beforeCustExpression);
 
                 FindMemberExpressionsVisitor v = new FindMemberExpressionsVisitor(last.CustomExpression.Parameters[0].Type/*Parent type of current property*/);
                 v.Visit(last.CustomExpression.Body);
 
-                fullName = BuildFullName(propertyMapInfoList);
                 PrependParentNameVisitor visitor = new PrependParentNameVisitor(InfoDictionary[parameterExpression].DestType, last.CustomExpression.Parameters[0].Type/*Parent type of current property*/, fullName, InfoDictionary[parameterExpression].NewParameter);
-                Expression ex = visitor.Visit(v.Result);
+                Expression ex = propertyMapInfoList[propertyMapInfoList.Count - 1] != last
+                    ? ex = visitor.Visit(v.Result.AddExpressions(afterCustExpression))
+                    : ex = visitor.Visit(v.Result);
+
                 return ex;
             }
             else

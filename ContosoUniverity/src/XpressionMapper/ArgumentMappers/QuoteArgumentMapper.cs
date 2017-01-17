@@ -17,7 +17,7 @@ namespace XpressionMapper.ArgumentMappers
                 LambdaExpression lambdaExpression = (LambdaExpression)((UnaryExpression)this.argument).Operand;
                 Expression ex = this.ExpressionVisitor.Visit(lambdaExpression.Body);
 
-                LambdaExpression mapped = Expression.Lambda(ex, lambdaExpression.Parameters.GetDestinationParameterExpressions(this.ExpressionVisitor.InfoDictionary));
+                LambdaExpression mapped = Expression.Lambda(ex, lambdaExpression.GetDestinationParameterExpressions(this.ExpressionVisitor.InfoDictionary, this.ExpressionVisitor.TypeMappings));
                 return Expression.Quote(mapped);
             }
         }

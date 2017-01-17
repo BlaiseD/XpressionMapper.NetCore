@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using XpressionMapper.Structures;
 
 namespace XpressionMapper.Extensions
 {
@@ -157,12 +158,49 @@ namespace XpressionMapper.Extensions
             Expression parent = newParameter;
             foreach (var part in parts)
             {
-                PropertyInfo info = type.GetTypeInfo().GetProperty(part);
-                parent = Expression.Property(parent, info);
-                type = info.PropertyType;
+                MemberInfo mInfo = type.GetMember(part).First();
+                PropertyInfo pInfo = mInfo as PropertyInfo;//type.GetProperty(part);
+                FieldInfo fInfo = mInfo as FieldInfo;//type.GetProperty(part);
+
+                if (pInfo != null)
+                {
+                    parent = Expression.Property(parent, pInfo);
+                    type = pInfo.PropertyType;
+                }
+                else
+                {
+                    parent = Expression.Field(parent, fInfo);
+                    type = fInfo.FieldType;
+                }
             }
 
             return (MemberExpression)parent;
+        }
+
+        /// <summary>
+        /// Adds member expressions to an existing expression.
+        /// </summary>
+        /// <param name="exp"></param>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static MemberExpression AddExpressions(this Expression exp, List<PropertyMapInfo> list)
+        {
+            foreach (PropertyMapInfo propertyMapInfo in list)
+            {
+                MemberInfo memberInfo = propertyMapInfo.DestinationPropertyInfo;
+
+                PropertyInfo pInfo;
+                FieldInfo fInfo;
+                MethodInfo mInfo;
+                if ((pInfo = memberInfo as PropertyInfo) != null)
+                    exp = Expression.Property(exp, pInfo);
+                else if ((fInfo = memberInfo as FieldInfo) != null)
+                    exp = Expression.Field(exp, fInfo);
+                else if ((mInfo = memberInfo as MethodInfo) != null)
+                    exp = Expression.Call(exp, mInfo);
+            }
+
+            return (MemberExpression)exp;
         }
 
         /// <summary>
@@ -172,6 +210,9 @@ namespace XpressionMapper.Extensions
         /// <returns></returns>
         public static string GetMemberFullName(this LambdaExpression expr)
         {
+            if (expr.Body.NodeType == ExpressionType.Parameter)
+                return string.Empty;
+
             MemberExpression me;
             switch (expr.Body.NodeType)
             {
@@ -189,19 +230,16 @@ namespace XpressionMapper.Extensions
         }
 
         /// <summary>
-        /// Returns the underlying type typeof(T) when the type implements IEnumerable<T>.
+        /// Returns the underlying type typeof(T) when the type implements IEnumerable.
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static Type GetUnderlyingGenericType(this Type type)
+        public static List<Type> GetUnderlyingGenericTypes(this Type type)
         {
-            if (type == null)
-                return null;
+            if (type == null || !type.GetTypeInfo().IsGenericType)
+                return new List<Type>();
 
-            List<Type> types = type.GetTypeInfo().GetInterfaces()
-                .Where(t => t.GetTypeInfo().IsGenericType == true && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)).ToList();
-
-            return types.Count > 0 ? types[0].GetTypeInfo().GetGenericArguments()[0] : null;
+            return type.GetGenericArguments().ToList();
         }
     }
 }

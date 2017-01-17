@@ -1,11 +1,12 @@
 {
   "version": "1.0.0-*",
 
-    "dependencies": {
-        "AutoMapper": "5.2.0",
-        "NETStandard.Library": "1.6.1",
-        "System.Reflection": "4.3.0"
-    },
+  "dependencies": {
+    "AutoMapper": "5.2.0",
+    "NETStandard.Library": "1.6.1",
+    "System.Reflection": "4.3.0",
+    "System.Reflection.TypeExtensions": "4.3.0"
+  },
 
   "frameworks": {
     "netstandard1.6": {

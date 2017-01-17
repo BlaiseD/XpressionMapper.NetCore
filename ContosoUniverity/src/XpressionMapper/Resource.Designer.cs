@@ -78,7 +78,7 @@ namespace XpressionMapper {
         }
         
         /// <summary>
-        ///    Looks up a localized string similar to TCustom resolvers are not supported for expression mapping..
+        ///    Looks up a localized string similar to Custom resolvers are not supported for expression mapping..
         /// </summary>
         public static string customResolversNotSupported {
             get {
@@ -128,6 +128,15 @@ namespace XpressionMapper {
         public static string mapperInfoDictionaryIsNull {
             get {
                 return ResourceManager.GetString("mapperInfoDictionaryIsNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///    Looks up a localized string similar to Arguments must be expressions..
+        /// </summary>
+        public static string mustBeExpressions {
+            get {
+                return ResourceManager.GetString("mustBeExpressions", resourceCulture);
             }
         }
         
