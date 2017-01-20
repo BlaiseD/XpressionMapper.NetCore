@@ -147,7 +147,6 @@ namespace XpressionMapper
 
             infoDictionary.Add(parameterExpression, this.TypeMappings);
 
-            bool isExtension = node.Method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), true);
             List<Expression> listOfArgumentsForNewMethod = node.Arguments.Aggregate(new List<Expression>(), (lst, next) =>
             {
                 Expression mappedNext = ArgumentMapper.Create(this, next).MappedArgumentExpression;
@@ -254,7 +253,7 @@ namespace XpressionMapper
                 return;
             }
 
-            TypeMap typeMap = this.ConfigurationProvider.FindTypeMapFor(typeDestination, typeSource);//The destination becomes the source because to map a source expression to a destination expression,
+            TypeMap typeMap = this.ConfigurationProvider.ResolveTypeMap(typeDestination, typeSource);//The destination becomes the source because to map a source expression to a destination expression,
             //we need the expressions used to create the source from the destination 
 
             if (sourceFullName.IndexOf(PERIOD) < 0)
