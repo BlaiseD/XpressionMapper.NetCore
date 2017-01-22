@@ -193,7 +193,7 @@ namespace XpressionMapper
                         ? info.CustomExpression.GetMemberFullName()
                         : string.Concat(fullName, ".", info.CustomExpression.GetMemberFullName());
                 }
-                else //if (info.DestinationPropertyInfo != null)
+                else
                 {
                     StringBuilder additions = info.DestinationPropertyInfos.Aggregate(new StringBuilder(fullName), (sb, next) =>
                     {
