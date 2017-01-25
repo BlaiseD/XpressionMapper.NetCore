@@ -42,6 +42,12 @@ namespace StoreTestConsole
                         a => a.Include(x => x.Enrollments).ThenInclude(e => e.Course)
                     })).ToList();
 
+                List<Course> courselist = (await store.GetAsync<Course>(null, null,
+                    new Func<IQueryable<Course>, IIncludableQueryable<Course, object>>[]
+                    {
+                        a => a.Include(x => x.Department.Administrator.OfficeAssignment)
+                    })).ToList();
+
                 await Seed_Database(store);
 
             }).Wait();/**/
