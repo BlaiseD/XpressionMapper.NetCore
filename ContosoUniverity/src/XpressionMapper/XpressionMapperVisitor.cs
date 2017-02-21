@@ -99,18 +99,18 @@ namespace XpressionMapper
                 });
 
                 fullName = BuildFullName(beforeCustExpression);
-                PrependParentNameVisitor visitor = new PrependParentNameVisitor(infoDictionary[parameterExpression].DestType, last.CustomExpression.Parameters[0].Type/*Parent type of current property*/, fullName, infoDictionary[parameterExpression].NewParameter);
+                PrependParentNameVisitor visitor = new PrependParentNameVisitor(last.CustomExpression.Parameters[0].Type/*Parent type of current property*/, fullName, infoDictionary[parameterExpression].NewParameter);
 
                 Expression ex = propertyMapInfoList[propertyMapInfoList.Count - 1] != last
-                    ? ex = visitor.Visit(last.CustomExpression.Body.AddExpressions(afterCustExpression))
-                    : ex = visitor.Visit(last.CustomExpression.Body);
+                    ? visitor.Visit(last.CustomExpression.Body.AddExpressions(afterCustExpression))
+                    : visitor.Visit(last.CustomExpression.Body);
 
                 return ex;
             }
             else
             {
                 fullName = BuildFullName(propertyMapInfoList);
-                MemberExpression me = infoDictionary[parameterExpression].NewParameter.BuildExpression(infoDictionary[parameterExpression].DestType, fullName);
+                MemberExpression me = infoDictionary[parameterExpression].NewParameter.BuildExpression(fullName);
                 return me;
             }
         }
@@ -121,14 +121,24 @@ namespace XpressionMapper
             if (constantExpression != null)
             {
                 if (constantExpression.Value == null)
-                    return base.VisitBinary(node.Update(node.Left, node.Conversion, Expression.Constant(null)));
+                {
+                    if (node.Left.Type.GetTypeInfo().IsValueType)
+                        return base.VisitBinary(node.Update(node.Left, node.Conversion, Expression.Constant(null, node.Left.Type)));
+                    else
+                        return base.VisitBinary(node.Update(node.Left, node.Conversion, Expression.Constant(null, typeof(object))));
+                }
             }
 
             constantExpression = node.Left as ConstantExpression;
             if (constantExpression != null)
             {
                 if (constantExpression.Value == null)
-                    return base.VisitBinary(node.Update(Expression.Constant(null), node.Conversion, node.Right));
+                {
+                    if (node.Right.Type.GetTypeInfo().IsValueType)
+                        return base.VisitBinary(node.Update(Expression.Constant(null, node.Right.Type), node.Conversion, node.Right));
+                    else
+                        return base.VisitBinary(node.Update(Expression.Constant(null, typeof(object)), node.Conversion, node.Right));
+                }
             }
 
             Expression newLeft = this.Visit(node.Left);
