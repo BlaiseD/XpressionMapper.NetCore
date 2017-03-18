@@ -4,11 +4,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore.Query;
+using AutoMapper.XpressionMapper.Extensions;
 using ContosoUniversity.Crud.DataStores;
 using ContosoUniversity.Data;
 using ContosoUniversity.Domain;
-using XpressionMapper.Extensions;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace ContosoUniversity.Repositories
 {

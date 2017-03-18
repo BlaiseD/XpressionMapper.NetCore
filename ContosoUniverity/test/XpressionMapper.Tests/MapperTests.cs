@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using AutoMapper;
+using AutoMapper.XpressionMapper.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
-using XpressionMapper.Extensions;
 
 namespace XpressionMapper.Tests
 {

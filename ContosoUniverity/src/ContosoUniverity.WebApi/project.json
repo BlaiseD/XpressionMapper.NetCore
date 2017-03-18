@@ -16,18 +16,19 @@
             "version": "1.1.0",
             "type": "platform"
         },
-        "AutoMapper": "5.2.0",
+        "AutoMapper": "6.0.1",
         "Microsoft.EntityFrameworkCore": "1.1.0",
         "Microsoft.Extensions.DependencyInjection": "1.1.0",
         "System.IO.FileSystem": "4.3.0",
         "System.Reflection": "4.3.0",
-      "System.Linq.Expressions": "4.3.0",
-      "ContosoUniverity.Domain": { "target": "project" },
-      "ContosoUniverity.Utils": { "target": "project" },
-      "ContosoUniverity.AutoMapperProfiles": { "target": "project" },
-      "ContosoUniverity.Crud": { "target": "project" },
-      "ContosoUniverity.Contexts": { "target": "project" },
-      "ContosoUniversity.Repositories": { "target": "project" }    },
+        "System.Linq.Expressions": "4.3.0",
+        "ContosoUniverity.Domain": { "target": "project" },
+        "ContosoUniverity.Utils": { "target": "project" },
+        "ContosoUniverity.AutoMapperProfiles": { "target": "project" },
+        "ContosoUniverity.Crud": { "target": "project" },
+        "ContosoUniverity.Contexts": { "target": "project" },
+        "ContosoUniversity.Repositories": { "target": "project" }
+    },
 
   "tools": {
     "Microsoft.AspNetCore.Server.IISIntegration.Tools": "1.0.0-preview2-final"
